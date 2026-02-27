@@ -4,7 +4,7 @@ const isDevelopment =
 const API_KEY = import.meta.env.VITE_RAWG_API_KEY
 
 export const apiService = {
-  async getGames(limit = 10) {
+  async getGames(limit = 50) {
     try {
       let url
       if (isDevelopment) {

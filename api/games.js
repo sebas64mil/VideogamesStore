@@ -13,7 +13,7 @@ export default async function handler(req, res) {
     return
   }
 
-  const { limit = 10 } = req.query
+  const { limit = 50 } = req.query
   const API_KEY = process.env.VITE_RAWG_API_KEY
 
   console.log('API_KEY:', API_KEY ? 'presente' : 'falta')

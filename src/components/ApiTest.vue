@@ -7,12 +7,16 @@ const connectionMessage = ref('')
 const games = ref([])
 
 onMounted(async () => {
-  const result = await apiService.testConnection()
-  connectionStatus.value = result.success ? 'connected' : 'error'
-  connectionMessage.value = result.message
+  try {
+    const data = await apiService.getGames(10)
+    games.value = data.results || []
 
-  if (result.success && result.data.results) {
-    games.value = result.data.results
+    connectionStatus.value = 'connected'
+    connectionMessage.value = `Conexión exitosa. Juegos cargados: ${games.value.length}`
+  } catch (error) {
+    connectionStatus.value = 'error'
+    connectionMessage.value = `Error de conexión: ${error.message}`
+    console.error('Error al obtener juegos:', error)
   }
 })
 </script>
@@ -30,7 +34,7 @@ onMounted(async () => {
     <div v-if="games.length > 0" class="games-preview">
       <h2>Primeros juegos obtenidos:</h2>
       <ul>
-        <li v-for="game in games.slice(0, 5)" :key="game.id">
+        <li v-for="game in games" :key="game.id">
           <strong>{{ game.name }}</strong> (Lanzamiento: {{ game.released || 'N/A' }})
         </li>
       </ul>
