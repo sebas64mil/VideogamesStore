@@ -1,20 +1,18 @@
-// Detecta si estamos en producción o desarrollo
-const API_URL =
-  process.env.NODE_ENV === 'production' || window.location.hostname !== 'localhost'
-    ? '/api/games'
-    : 'https://api.rawg.io/api'
+// Detecta si estamos en desarrollo (localhost)
+const isDevelopment =
+  window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
 const API_KEY = import.meta.env.VITE_RAWG_API_KEY
 
 export const apiService = {
   async getGames(limit = 10) {
     try {
       let url
-      if (API_URL === '/api/games') {
-        // Usar proxy de Vercel
-        url = `${API_URL}?limit=${limit}`
-      } else {
+      if (isDevelopment) {
         // Usar API directa en desarrollo
-        url = `${API_URL}/games?key=${API_KEY}&page_size=${limit}`
+        url = `https://api.rawg.io/api/games?key=${API_KEY}&page_size=${limit}`
+      } else {
+        // Usar proxy de Vercel
+        url = `/api/games?limit=${limit}`
       }
 
       const response = await fetch(url)
@@ -31,12 +29,12 @@ export const apiService = {
   async testConnection() {
     try {
       let url
-      if (API_URL === '/api/games') {
-        // Usar proxy de Vercel
-        url = `${API_URL}?limit=1`
-      } else {
+      if (isDevelopment) {
         // Usar API directa en desarrollo
-        url = `${API_URL}/games?key=${API_KEY}&page_size=1`
+        url = `https://api.rawg.io/api/games?key=${API_KEY}&page_size=1`
+      } else {
+        // Usar proxy de Vercel
+        url = '/api/games?limit=1'
       }
 
       const response = await fetch(url)
