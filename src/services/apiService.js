@@ -1,7 +1,7 @@
 // Detecta si estamos en desarrollo (localhost)
 const isDevelopment =
   window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-const API_KEY = import.meta.env.RAWG_API_KEY
+const API_KEY = import.meta.env.VITE_RAWG_API_KEY
 
 export const apiService = {
   async getGames(limit = 10) {
