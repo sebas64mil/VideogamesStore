@@ -1,4 +1,4 @@
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   // Permitir CORS
   res.setHeader('Access-Control-Allow-Credentials', 'true')
   res.setHeader('Access-Control-Allow-Origin', '*')
@@ -20,7 +20,7 @@ module.exports = async function handler(req, res) {
   console.log('limit:', limit)
 
   if (!API_KEY) {
-    return res.status(500).json({ error: 'API key not configured', env: process.env })
+    return res.status(500).json({ error: 'API key not configured' })
   }
 
   try {
@@ -33,7 +33,7 @@ module.exports = async function handler(req, res) {
     const data = await response.json()
     res.status(200).json(data)
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Error en /api/games:', error)
     res.status(500).json({ error: error.message })
   }
 }
