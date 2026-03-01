@@ -13,6 +13,8 @@ onMounted(async () => {
 
     connectionStatus.value = 'connected'
     connectionMessage.value = `Conexión exitosa. Juegos cargados: ${games.value.length}`
+
+    console.log('Juegos obtenidos:', games.value) 
   } catch (error) {
     connectionStatus.value = 'error'
     connectionMessage.value = `Error de conexión: ${error.message}`
@@ -35,7 +37,7 @@ onMounted(async () => {
       <h2>Primeros juegos obtenidos:</h2>
       <ul>
         <li v-for="game in games" :key="game.id">
-          <strong>{{ game.name }}</strong> (Lanzamiento: {{ game.released || 'N/A' }})
+          <strong>{{ game.name }}</strong> (rating: {{ game.rating|| 'N/A' }})
         </li>
       </ul>
     </div>

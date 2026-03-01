@@ -1,0 +1,100 @@
+:root {
+  /* Spacing (px) */
+  --spacing-3xs: 2px;
+  --spacing-2xs: 4px;
+  --spacing-xs: 8px;
+  --spacing-s: 12px;
+  --spacing-m: 16px;
+  --spacing-l: 20px;
+  --spacing-xl: 24px;
+  --spacing-2xl: 32px;
+  --spacing-3xl: 40px;
+  --spacing-4xl: 48px;
+  --spacing-5xl: 56px;
+  --spacing-6xl: 64px;
+  --spacing-7xl: 72px;
+  --spacing-8xl: 80px;
+  --spacing-9xl: 96px;
+
+  /* Radius (px) */
+  --radius-none: 0px;
+  --radius-2xs: 2px;
+  --radius-xs: 4px;
+  --radius-s: 6px;
+  --radius-m: 8px;
+  --radius-l: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-3xl: 20px;
+  --radius-4xl: 24px;
+  --radius-5xl: 28px;
+  --radius-6xl: 32px;
+  --radius-7xl: 36px;
+  --radius-8xl: 40px;
+  --radius-full: 999px;
+
+  /* Layout / responsive sizes (px) */
+  --layout-width: 1440px; /* Width */
+  --layout-padding: 120px; /* padding */
+  --layout-search-width: 648px; /* WidthSearch */
+  --layout-filters-padding: 96px; /* PaddingFilters */
+
+  /* Colors */
+  --color-principal: #25262d; /* ColorPrincipal */
+  --color-secondary: #bcc7f7; /* ColorSecondary */
+  --gray-1: #434555; /* GrayColor1 */
+  --gray-2: #4f5480; /* GrayColor2 */
+  --gray-3: #4d56aa; /* GrayColor3 */
+  --white-color: #e9e5e5; /* WhiteColor */
+
+
+    --font-oswald: "Oswald", sans-serif;
+  --font-lemon: "LEMON MILK", sans-serif;
+
+
+  --fs-0: 8px;
+  --fs-1: 10px;
+  --fs-2: 12px;
+  --fs-3: 14px;
+  --fs-4: 16px;
+  --fs-5: 18px;
+  --fs-6: 22px;
+  --fs-7: 26px;
+  --fs-8: 32px;
+
+
+  --lh-0: 48px;
+  --lh-1: 39px;
+  --lh-2: 33px;
+  --lh-3: 27px;
+  --lh-4: 24px;
+  --lh-5: 21px;
+  --lh-6: 18px;
+  --lh-7: 15px;
+  --lh-8: 12px;
+
+
+  --fw-bold: 700;
+  --fw-regular: 400;
+
+}
+
+/* Tablet (≤ 1024px) */
+@media (max-width: 1024px) {
+  :root {
+    --layout-width: 1024px;
+    --layout-padding: 40px;
+    --layout-search-width: 480px;
+    --layout-filters-padding: 72px;
+  }
+}
+
+/* Mobile (≤ 768px) */
+@media (max-width: 438px) {
+  :root {
+    --layout-width: 430px;
+    --layout-padding: 30px;
+    --layout-search-width: 159px;
+    --layout-filters-padding: 24px;
+  }
+}
