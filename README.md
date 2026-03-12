@@ -9,10 +9,25 @@ VideogamesStore es una aplicación web moderna que permite a los usuarios explor
 ### Características principales:
 
 - Exploración de catálogo de videojuegos
-- Filtrado por categorías y plataformas
+- Filtrado por géneros, plataformas y juegos Free to Play
+- Filtros de usuario por Wishlist y Library desde el sidebar
+- Wishlist y Library persistentes (se conservan al recargar)
 - Búsqueda de juegos
+- Cambio de vista de tarjetas en escritorio (Grid/Flex) persistente
+- Orden por relevancia (High to Low / Low to High) usando chart
 - Diseño responsive y moderno
 - Integración con API de videojuegos
+
+### Estado global con Pinia
+
+La aplicación usa stores de Pinia para centralizar y persistir estado entre componentes:
+
+- `filters`: filtros globales (género, plataforma, freeOnly, userListFilter)
+- `collection`: gestión de Wishlist y Library con persistencia en `localStorage`
+- `viewMode`: modo visual de tarjetas en escritorio (`grid` o `flex`)
+- `sortMode`: orden de relevancia (`desc` o `asc`)
+
+Esto permite que Sidebar, SectionCards y CardGame compartan estado en tiempo real sin perder información al recargar la página.
 
 ## API Utilizada
 
