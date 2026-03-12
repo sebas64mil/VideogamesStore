@@ -1,6 +1,8 @@
 <script setup>
 import BaseButton from '@/components/Button.vue'
 import { useMenuStore } from '@/stores/menu'
+import { useFiltersStore } from '@/stores/filters'
+import { useCollectionStore } from '@/stores/collection'
 
 import {
   IconHome,
@@ -26,6 +28,108 @@ import {
 } from '@/Icons'
 
 const menuStore = useMenuStore()
+const filtersStore = useFiltersStore()
+const collectionStore = useCollectionStore()
+
+const genreLabels = [
+  'Action',
+  'Strategy',
+  'RPG',
+  'Shooter',
+  'Adventure',
+  'Puzzle',
+  'Racing',
+  'Sports',
+]
+const platformLabels = ['PC', 'PlayStation 4', 'Xbox One', 'Nintendo Switch', 'iOS', 'Android']
+
+const onSidebarItemClick = (sectionTitle, itemLabel) => {
+  if (itemLabel === 'Home') {
+    if (typeof filtersStore.clearFilters === 'function') {
+      filtersStore.clearFilters()
+    }
+  }
+
+  if (sectionTitle === 'Genres') {
+    if (itemLabel === 'Free only games') {
+      if (typeof filtersStore.toggleFreeOnly === 'function') {
+        filtersStore.toggleFreeOnly()
+      }
+    } else if (genreLabels.includes(itemLabel)) {
+      if (typeof filtersStore.setGenre === 'function') {
+        filtersStore.setGenre(itemLabel)
+      }
+    }
+  }
+
+  if (sectionTitle === 'User') {
+    if (itemLabel === 'Wishlist') {
+      if (typeof filtersStore.setUserListFilter === 'function') {
+        filtersStore.setUserListFilter('wishlist')
+      }
+    }
+
+    if (itemLabel === 'Library') {
+      if (typeof filtersStore.setUserListFilter === 'function') {
+        filtersStore.setUserListFilter('library')
+      }
+    }
+  }
+
+  if (sectionTitle === 'Platforms' && platformLabels.includes(itemLabel)) {
+    if (typeof filtersStore.setPlatform === 'function') {
+      filtersStore.setPlatform(itemLabel)
+    }
+  }
+
+  menuStore.close()
+}
+
+const isItemActive = (sectionTitle, itemLabel) => {
+  if (itemLabel === 'Home') {
+    return !filtersStore.hasActiveFilters
+  }
+
+  if (sectionTitle === 'Genres') {
+    if (itemLabel === 'Free only games') {
+      return filtersStore.freeOnly
+    }
+
+    if (typeof filtersStore.isGenreActive === 'function') {
+      return filtersStore.isGenreActive(itemLabel)
+    }
+
+    return false
+  }
+
+  if (sectionTitle === 'Platforms') {
+    if (typeof filtersStore.isPlatformActive === 'function') {
+      return filtersStore.isPlatformActive(itemLabel)
+    }
+
+    return false
+  }
+
+  if (sectionTitle === 'User') {
+    if (itemLabel === 'Wishlist') {
+      if (typeof filtersStore.isUserListFilterActive === 'function') {
+        return filtersStore.isUserListFilterActive('wishlist')
+      }
+
+      return filtersStore.userListFilter === 'wishlist'
+    }
+
+    if (itemLabel === 'Library') {
+      if (typeof filtersStore.isUserListFilterActive === 'function') {
+        return filtersStore.isUserListFilterActive('library')
+      }
+
+      return filtersStore.userListFilter === 'library'
+    }
+  }
+
+  return false
+}
 
 const sections = [
   {
@@ -68,6 +172,18 @@ const sections = [
     ],
   },
 ]
+
+const getItemLabel = (sectionTitle, itemLabel) => {
+  if (sectionTitle === 'User' && itemLabel === 'Wishlist') {
+    return `Wishlist (${collectionStore.wishlistCount || 0})`
+  }
+
+  if (sectionTitle === 'User' && itemLabel === 'Library') {
+    return `Library (${collectionStore.libraryCount || 0})`
+  }
+
+  return itemLabel
+}
 </script>
 
 <template>
@@ -96,9 +212,13 @@ const sections = [
             variant="outline"
             size="sm"
             icon-position="right"
-            class="sidebar-button"
+            :class="[
+              'sidebar-button',
+              { 'sidebar-button--active': isItemActive(section.title, item.label) },
+            ]"
+            @click="onSidebarItemClick(section.title, item.label)"
           >
-            {{ item.label }}
+            {{ getItemLabel(section.title, item.label) }}
 
             <template #icon>
               <component :is="item.icon" :size="20" />
@@ -162,6 +282,10 @@ const sections = [
   width: 100%;
   justify-content: space-between;
   text-transform: uppercase;
+}
+
+.sidebar-button--active {
+  box-shadow: 0px 0px 8px 2px var(--gray-2);
 }
 
 /* Divider */

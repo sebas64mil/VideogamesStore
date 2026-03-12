@@ -1,12 +1,20 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import BaseButton from '@/components/Button.vue'
 import CardGame from '@/components/CardGame.vue'
 import { IconGrid, IconFlex, IconArrow, IconMenu } from '@/Icons'
 import { apiService } from '@/services/apiService'
 import { useMenuStore } from '@/stores/menu'
+import { useFiltersStore } from '@/stores/filters'
+import { useCollectionStore } from '@/stores/collection'
+import { useViewModeStore } from '@/stores/viewMode'
+import { useSortModeStore } from '@/stores/sortMode'
 
 const menuStore = useMenuStore()
+const filtersStore = useFiltersStore()
+const collectionStore = useCollectionStore()
+const viewModeStore = useViewModeStore()
+const sortModeStore = useSortModeStore()
 
 // Estado reactivo para los juegos
 const games = ref([])
@@ -44,10 +52,58 @@ const mapGameData = (game, index) => ({
   image: game.background_image,
   releaseDate: formatDate(game.released),
   genre: game.genres?.[0]?.name || 'Unknown',
+  genres: game.genres?.map((genre) => genre.name.toLowerCase()) || [],
+  isFreeToPlay:
+    game.tags?.some((tag) => {
+      const normalizedTag = tag.name?.toLowerCase() || ''
+      return normalizedTag.includes('free to play') || normalizedTag.includes('free-to-play')
+    }) || false,
   chart: `#${index + 1}`,
   platforms: [
     ...new Set(game.platforms?.map((p) => mapPlatform(p.platform.name)).filter(Boolean) || []),
   ],
+})
+
+const filteredGames = computed(() => {
+  return games.value.filter((game) => {
+    const matchGenre =
+      !filtersStore.selectedGenre || game.genres.includes(filtersStore.selectedGenre)
+    const matchPlatform =
+      !filtersStore.selectedPlatform || game.platforms.includes(filtersStore.selectedPlatform)
+    const matchFreeOnly = !filtersStore.freeOnly || game.isFreeToPlay
+    const matchUserList =
+      !filtersStore.userListFilter ||
+      (filtersStore.userListFilter === 'wishlist' && collectionStore.isInWishlist(game.id)) ||
+      (filtersStore.userListFilter === 'library' && collectionStore.isInLibrary(game.id))
+
+    return matchGenre && matchPlatform && matchFreeOnly && matchUserList
+  })
+})
+
+const getChartValue = (chart) => {
+  const numericValue = Number.parseInt(String(chart).replace('#', ''), 10)
+  return Number.isNaN(numericValue) ? 0 : numericValue
+}
+
+const sortedGames = computed(() => {
+  const orderedGames = [...filteredGames.value]
+
+  orderedGames.sort((a, b) => {
+    const chartA = getChartValue(a.chart)
+    const chartB = getChartValue(b.chart)
+
+    return sortModeStore.relevanceSortOrder === 'desc' ? chartB - chartA : chartA - chartB
+  })
+
+  return orderedGames
+})
+
+const relevanceSortLabel = computed(() => {
+  return sortModeStore.relevanceSortOrder === 'desc' ? 'High to Low' : 'Low to High'
+})
+
+const cardsLayoutClass = computed(() => {
+  return viewModeStore.desktopMode === 'flex' ? 'cards-grid--flex' : 'cards-grid--grid'
 })
 
 // Cargar juegos al montar el componente
@@ -86,8 +142,13 @@ onMounted(async () => {
     <!-- Header con controles -->
     <header class="controls-header">
       <!-- Botón Order By (izquierda) -->
-      <BaseButton size="sm" variant="filled" iconPosition="right">
-        Order By: Relevance
+      <BaseButton
+        size="sm"
+        variant="filled"
+        iconPosition="right"
+        @click="sortModeStore.toggleRelevanceSortOrder"
+      >
+        Order By: Relevance {{ relevanceSortLabel }}
         <template #icon>
           <IconArrow :size="26" />
         </template>
@@ -95,12 +156,24 @@ onMounted(async () => {
 
       <!-- Botones de vista (derecha) -->
       <nav class="view-controls">
-        <BaseButton size="sm" variant="filled" iconOnly class="view-btn--active">
+        <BaseButton
+          size="sm"
+          variant="filled"
+          iconOnly
+          :class="{ 'view-btn--active': viewModeStore.desktopMode === 'flex' }"
+          @click="viewModeStore.setDesktopMode('flex')"
+        >
           <template #icon>
             <IconFlex :size="26" />
           </template>
         </BaseButton>
-        <BaseButton size="sm" variant="filled" iconOnly>
+        <BaseButton
+          size="sm"
+          variant="filled"
+          iconOnly
+          :class="{ 'view-btn--active': viewModeStore.desktopMode === 'grid' }"
+          @click="viewModeStore.setDesktopMode('grid')"
+        >
           <template #icon>
             <IconGrid :size="26" />
           </template>
@@ -109,7 +182,7 @@ onMounted(async () => {
     </header>
 
     <!-- Grid de cartas -->
-    <section class="cards-grid">
+    <section :class="['cards-grid', cardsLayoutClass]">
       <!-- Estado de carga -->
       <div v-if="loading" class="loading-state">
         <p>Cargando juegos...</p>
@@ -123,15 +196,24 @@ onMounted(async () => {
       <!-- Lista de juegos -->
       <template v-else>
         <CardGame
-          v-for="game in games"
+          v-for="game in sortedGames"
           :key="game.id"
+          :id="game.id"
           :title="game.title"
           :image="game.image"
           :releaseDate="game.releaseDate"
           :genre="game.genre"
           :chart="game.chart"
           :platforms="game.platforms"
+          :is-in-wishlist="collectionStore.isInWishlist(game.id)"
+          :is-in-library="collectionStore.isInLibrary(game.id)"
+          @toggle-wishlist="collectionStore.toggleWishlist"
+          @toggle-library="collectionStore.toggleLibrary"
         />
+
+        <div v-if="!sortedGames.length" class="empty-state">
+          <p>No hay juegos que coincidan con tu filtro actual.</p>
+        </div>
       </template>
     </section>
   </section>
@@ -178,14 +260,25 @@ onMounted(async () => {
 /* Grid de cartas */
 .cards-grid {
   align-self: stretch;
+  gap: var(--spacing-2xl);
+}
+
+.cards-grid--grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: var(--spacing-2xl);
+}
+
+.cards-grid--flex {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  justify-content: flex-start;
 }
 
 /* Estados de carga y error */
 .loading-state,
-.error-state {
+.error-state,
+.empty-state {
   grid-column: 1 / -1;
   text-align: center;
   padding: var(--spacing-2xl);
@@ -200,6 +293,10 @@ onMounted(async () => {
 .error-state p {
   font-size: var(--fs-2);
   color: #ff6b6b;
+}
+
+.empty-state p {
+  font-size: var(--fs-2);
 }
 
 /* Botón menú tablet (oculto por defecto) */
@@ -234,6 +331,7 @@ onMounted(async () => {
   }
 
   .cards-grid {
+    display: grid;
     grid-template-columns: 1fr;
     justify-items: center;
   }

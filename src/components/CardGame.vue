@@ -13,16 +13,40 @@ import {
 } from '@/Icons'
 
 const props = defineProps({
+  id: {
+    type: Number,
+    default: null,
+  },
   title: String,
   image: String,
   releaseDate: String,
   genre: String,
   chart: String,
+  isInWishlist: {
+    type: Boolean,
+    default: false,
+  },
+  isInLibrary: {
+    type: Boolean,
+    default: false,
+  },
   platforms: {
     type: Array,
     default: () => [],
   },
 })
+
+const emits = defineEmits(['toggle-wishlist', 'toggle-library'])
+
+const toggleLibrary = () => {
+  if (props.id == null) return
+  emits('toggle-library', props.id)
+}
+
+const toggleWishlist = () => {
+  if (props.id == null) return
+  emits('toggle-wishlist', props.id)
+}
 
 const platformMap = {
   PC: IconPC,
@@ -57,14 +81,25 @@ const platformMap = {
 
       <!-- Buttons -->
       <div class="card__buttons">
-        <BaseButton size="sm" variant="filled">
+        <BaseButton
+          size="sm"
+          variant="filled"
+          :class="{ 'card-action--active': isInLibrary }"
+          @click="toggleLibrary"
+        >
           <template #icon>
             <IconPlus :size="14" />
           </template>
-          N#
+          {{ isInLibrary ? 'In Library' : 'Add' }}
         </BaseButton>
 
-        <BaseButton size="sm" variant="filled" iconOnly>
+        <BaseButton
+          size="sm"
+          variant="filled"
+          iconOnly
+          :class="{ 'card-action--active': isInWishlist }"
+          @click="toggleWishlist"
+        >
           <template #icon>
             <IconGift :size="14" />
           </template>
@@ -103,7 +138,9 @@ const platformMap = {
   flex-direction: column;
 
   /* transición suave */
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
 }
 
 /* sombra solo en hover */
@@ -149,6 +186,12 @@ const platformMap = {
   display: flex;
   flex-direction: column;
   gap: 9px;
+}
+
+.card-action--active {
+  box-shadow:
+    0px 0px 8px var(--color-secondary),
+    0px 0px 28px 6px var(--color-principal) inset;
 }
 
 .info-row {
