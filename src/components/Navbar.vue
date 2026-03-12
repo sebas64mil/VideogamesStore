@@ -4,9 +4,10 @@ import SearchInput from './SearchInput.vue'
 import Button from './Button.vue'
 import { IconTheme, IconMenu } from '@/Icons'
 import { useMenuStore } from '@/stores/menu'
+import { useSearchStore } from '@/stores/search'
 
 const menuStore = useMenuStore()
-const searchQuery = ref('')
+const searchStore = useSearchStore()
 const isVisible = ref(true)
 
 let lastScroll = 0
@@ -39,7 +40,7 @@ onUnmounted(() => {
     <div class="navbar__logo">LVSV</div>
 
     <div class="navbar__search">
-      <SearchInput v-model="searchQuery" />
+      <SearchInput v-model="searchStore.query" />
     </div>
 
     <div class="navbar__actions">
@@ -128,9 +129,8 @@ onUnmounted(() => {
 ========================= */
 @media (max-width: 438px) {
   .navbar {
-padding: 4px var(--layout-padding)  
-
-}
+    padding: 4px var(--layout-padding);
+  }
 
   .navbar__actions {
     display: none;

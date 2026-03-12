@@ -9,12 +9,14 @@ import { useFiltersStore } from '@/stores/filters'
 import { useCollectionStore } from '@/stores/collection'
 import { useViewModeStore } from '@/stores/viewMode'
 import { useSortModeStore } from '@/stores/sortMode'
+import { useSearchStore } from '@/stores/search'
 
 const menuStore = useMenuStore()
 const filtersStore = useFiltersStore()
 const collectionStore = useCollectionStore()
 const viewModeStore = useViewModeStore()
 const sortModeStore = useSortModeStore()
+const searchStore = useSearchStore()
 
 // Estado reactivo para los juegos
 const games = ref([])
@@ -71,12 +73,16 @@ const filteredGames = computed(() => {
     const matchPlatform =
       !filtersStore.selectedPlatform || game.platforms.includes(filtersStore.selectedPlatform)
     const matchFreeOnly = !filtersStore.freeOnly || game.isFreeToPlay
+    const matchSearch =
+      !searchStore.normalizedQuery ||
+      game.title.toLowerCase().includes(searchStore.normalizedQuery) ||
+      game.genre.toLowerCase().includes(searchStore.normalizedQuery)
     const matchUserList =
       !filtersStore.userListFilter ||
       (filtersStore.userListFilter === 'wishlist' && collectionStore.isInWishlist(game.id)) ||
       (filtersStore.userListFilter === 'library' && collectionStore.isInLibrary(game.id))
 
-    return matchGenre && matchPlatform && matchFreeOnly && matchUserList
+    return matchGenre && matchPlatform && matchFreeOnly && matchSearch && matchUserList
   })
 })
 
